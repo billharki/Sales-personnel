@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	id="WebApp_ID" version="3.0">
+	<display-name>sales-personnel-server</display-name>
+	<welcome-file-list>
+        <welcome-file>signin.html</welcome-file>
+    </welcome-file-list>
+	<context-param>
+		<param-name>cognito_pool_id</param-name>
+		<param-value>ap-south-1_aTaRSlRLU</param-value>
+	</context-param>
+
+	<context-param>
+		<param-name>cognito_client_id</param-name>
+		<param-value>1tehta8p5l8f59d5oe77nflu1m</param-value>
+	</context-param>
+	
+	
+	<servlet>
+        <servlet-name>Signin</servlet-name>
+        <servlet-class>com.example.sales.service.Signin</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Signin</servlet-name>
+        <url-pattern>/signin</url-pattern>
+    </servlet-mapping>
+
+     <servlet>
+        <servlet-name>SignUp</servlet-name>
+        <servlet-class>com.example.sales.service.Signup</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SignUp</servlet-name>
+        <url-pattern>/signup</url-pattern>
+    </servlet-mapping>
+
+     <servlet>
+        <servlet-name>ConfirmSignUp</servlet-name>
+        <servlet-class>com.example.sales.service.ConfirmSignup</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ConfirmSignUp</servlet-name>
+        <url-pattern>/confirmsignup</url-pattern>
+    </servlet-mapping>
+
+     <servlet>
+        <servlet-name>ValidatedAction</servlet-name>
+        <servlet-class>com.example.sales.service.ValidatedAction</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ValidatedAction</servlet-name>
+        <url-pattern>/validatedaction</url-pattern>
+    </servlet-mapping>
+	
+	
+	
+	
+	
+	
+	<servlet>
+		<servlet-name>jersey-serlvet</servlet-name>
+		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>com.sun.jersey.config.property.packages</param-name>
+			<param-value>com.example.sales.service</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>jersey-serlvet</servlet-name>
+		<url-pattern>/rest/*</url-pattern>
+	</servlet-mapping>
+
+</web-app>
