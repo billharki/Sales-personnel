@@ -11,8 +11,6 @@ import javax.servlet.http.Cookie;
 import net.sf.kdgcommons.lang.StringUtil;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
@@ -24,12 +22,9 @@ public class AbstractCognitoServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-protected BasicAWSCredentials awsCreds = new BasicAWSCredentials("AKIAJPI3LCGF27DTU5DA", "QCasniQFTtQEiQguyn0JDGA11Scj2mBrgcTX3Gu/");
-	
-//	protected AWSCredentialsProvider instanceProfileCredentialsProvider = new InstanceProfileCredentialsProvider(false);
-//	protected AWSCredentialsProvider credentialsProvider = new ProfileCredentialsProvider();
+	protected AWSCredentialsProvider credentialsProvider = new ProfileCredentialsProvider();
     protected AWSCognitoIdentityProvider cognitoClient1 = AWSCognitoIdentityProviderClientBuilder.standard()
-    									.withCredentials(new AWSStaticCredentialsProvider(awsCreds)).withRegion(Regions.AP_SOUTH_1).build();
+    									.withCredentials(credentialsProvider).withRegion(Regions.AP_SOUTH_1).build();
     
     protected static CredentialsCache tokenCache = new CredentialsCache(10000);
 

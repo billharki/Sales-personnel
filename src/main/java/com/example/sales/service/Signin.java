@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.amazonaws.services.cognitoidp.model.*;
 import net.sf.kdgcommons.lang.StringUtil;
@@ -51,6 +52,8 @@ public class Signin extends AbstractCognitoServlet
             {
                 updateCredentialCookies(response, authResponse.getAuthenticationResult());
                 reportResult(response, Constants.ResponseMessages.LOGGED_IN);
+                HttpSession session = request.getSession();
+                session.setAttribute("user", emailAddress);
                 return;
             }
             else if (ChallengeNameType.NEW_PASSWORD_REQUIRED.name().equals(authResponse.getChallengeName()))

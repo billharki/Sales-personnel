@@ -4,10 +4,17 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import net.sf.kdgcommons.lang.StringUtil;
 import net.sf.kdgcommons.lang.ThreadUtil;
@@ -26,7 +33,8 @@ import com.amazonaws.services.cognitoidp.model.TooManyRequestsException;
  * In a real application, this validation logic (and associated cache) should be
  * pushed into the abstract servlet.
  */
-public class ValidatedAction extends AbstractCognitoServlet {
+@WebFilter("/app/*")
+public class ValidatedAction extends AbstractCognitoServlet implements Filter {
 	private static final long serialVersionUID = 1L;
 
 	@Override
@@ -34,7 +42,6 @@ public class ValidatedAction extends AbstractCognitoServlet {
 			throws ServletException, IOException {
 		String accessToken = null;
 		String refreshToken = null;
-
 
 		Cookie[] cookies = request.getCookies();
 		if (cookies == null) {
@@ -55,8 +62,9 @@ public class ValidatedAction extends AbstractCognitoServlet {
 		}
 
 		try {
-//			GetUserRequest authRequest = new GetUserRequest().withAccessToken(accessToken);
-//			GetUserResult authResponse = cognitoClient.getUser(authRequest);
+			// GetUserRequest authRequest = new
+			// GetUserRequest().withAccessToken(accessToken);
+			// GetUserResult authResponse = cognitoClient.getUser(authRequest);
 
 			tokenCache.addToken(accessToken);
 			reportResult(response, Constants.ResponseMessages.LOGGED_IN);
@@ -98,6 +106,67 @@ public class ValidatedAction extends AbstractCognitoServlet {
 		} catch (AWSCognitoIdentityProviderException ex) {
 			reportResult(response, Constants.ResponseMessages.NOT_LOGGED_IN);
 		}
+	}
+
+	public ValidatedAction() {
+		// TODO Auto-generated constructor stub
+	}
+
+	/**
+	 * @see Filter#destroy()
+	 */
+	public void destroy() {
+		// TODO Auto-generated method stub
+	}
+
+	/**
+	 * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
+	 */
+	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+			throws IOException, ServletException {
+		HttpServletRequest request = (HttpServletRequest) req;
+		HttpServletResponse response = (HttpServletResponse) res;
+		String accessToken = null;
+		String refreshToken = null;
+
+		Cookie[] cookies = request.getCookies();
+		if (cookies == null) {
+			response.sendRedirect(request.getContextPath() + "/confirm-signup.html");
+		}
+
+		for (Cookie cookie : cookies) {
+			if (cookie.getName().equals(Constants.CookieNames.ACCESS_TOKEN))
+				accessToken = cookie.getValue();
+			if (cookie.getName().equals(Constants.CookieNames.REFRESH_TOKEN))
+				refreshToken = cookie.getValue();
+		}
+
+		if (tokenCache.checkToken(accessToken)) {
+			chain.doFilter(req, res);
+		}
+
+		try {
+
+			tokenCache.addToken(accessToken);
+			chain.doFilter(req, res);
+		} catch (NotAuthorizedException ex) {
+			if (ex.getErrorMessage().equals("Access Token has expired")) {
+				attemptRefresh(refreshToken, response);
+			} else {
+				response.sendRedirect(request.getContextPath() + "/confirm-signup.html");
+			}
+		} catch (TooManyRequestsException ex) {
+			ThreadUtil.sleepQuietly(250);
+			doPost(request, response);
+		}
+
+	}
+
+	/**
+	 * @see Filter#init(FilterConfig)
+	 */
+	public void init(FilterConfig fConfig) throws ServletException {
+		// TODO Auto-generated method stub
 	}
 
 	@Override
